@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from pymongo import MongoClient
 from pydantic import BaseModel
 
+from bson import ObjectId
+from fastapi.responses import JSONResponse
+
 app = FastAPI()
 
 # MongoDB 연결 설정
@@ -24,26 +27,46 @@ def create_user(user: User):
 # 사용자 조회
 @app.get("/users/{user_id}")
 def read_user(user_id: str):
-    user = collection.find_one({"_id": user_id})
+    user = collection.find_one({"_id": ObjectId(user_id)})
     if user:
+        user["_id"] = str(user["_id"])  # ObjectId를 문자열로 변환
         return user
     return {"message": "User not found"}
+
+#모든 사용자 조회
+@app.get("/users")
+def get_all_users():
+    users = collection.find()
+    users = list(users)
+    for user in users:
+        user["_id"] = str(user["_id"])  # ObjectId를 문자열로 변환
+    return JSONResponse(content=users)
 
 
 # 사용자 수정
 @app.put("/users/{user_id}")
-def update_user(user_id: str, updated_user: User):
-    user_data = updated_user.dict()
-    updated_user = collection.update_one({"_id": user_id}, {"$set": user_data})
-    if updated_user.modified_count > 0:
-        return {"message": "User updated successfully"}
-    return {"message": "User not found"}
+def update_user(user_id: str, updated_user: dict):
+    user = collection.find_one({"_id": ObjectId(user_id)})
+    if user:
+        result = collection.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user})
+        if result.modified_count > 0:
+            return {"message": "User updated successfully"}
+        else:
+            return {"message": "Failed to update user"}
+    else:
+        return {"message": "User not found"}
+
 
 
 # 사용자 삭제
 @app.delete("/users/{user_id}")
 def delete_user(user_id: str):
-    deleted_user = collection.delete_one({"_id": user_id})
-    if deleted_user.deleted_count > 0:
-        return {"message": "User deleted successfully"}
-    return {"message": "User not found"}
+    user = collection.find_one({"_id": ObjectId(user_id)})
+    if user:
+        result = collection.delete_one({"_id": ObjectId(user_id)})
+        if result.deleted_count > 0:
+            return {"message": "User deleted successfully"}
+        else:
+            return {"message": "Failed to delete user"}
+    else:
+        return {"message": "User not found"}
