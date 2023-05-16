@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 app = FastAPI()
 
 # MongoDB 연결 설정
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://1820:capstone1820@sporting-capstone.fg3joe2.mongodb.net/")
 db = client["mydatabase"]
 collection = db["users"]
 
