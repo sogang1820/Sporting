@@ -23,7 +23,6 @@ def create_user(user: User):
     inserted_user = collection.insert_one(user_data)
     return {"message": "User created successfully", "user_id": str(inserted_user.inserted_id)}
 
-
 # 사용자 조회
 @app.get("/users/{user_id}")
 def read_user(user_id: str):
@@ -42,7 +41,6 @@ def get_all_users():
         user["_id"] = str(user["_id"])  # ObjectId를 문자열로 변환
     return JSONResponse(content=users)
 
-
 # 사용자 수정
 @app.put("/users/{user_id}")
 def update_user(user_id: str, updated_user: dict):
@@ -55,8 +53,6 @@ def update_user(user_id: str, updated_user: dict):
             return {"message": "Failed to update user"}
     else:
         return {"message": "User not found"}
-
-
 
 # 사용자 삭제
 @app.delete("/users/{user_id}")

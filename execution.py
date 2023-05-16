@@ -24,20 +24,20 @@ response = requests.get(url)
 print(response.json())
 '''
 
-#
-
+#get_all_users
+'''
 url = "http://localhost:8000/users"
 
 response = requests.get(url)
 
 print(response.json())
-
+'''
 
 #PUT
 '''
 import requests
 
-url = "http://localhost:8000/users/64636f0c6b92989aee570127"  # 업데이트할 사용자 ID에 맞게 변경해주세요
+url = "http://localhost:8000/users/64637669862476104bc44fae"  # 업데이트할 사용자 ID에 맞게 변경해주세요
 data = {
     "name": "Updated Name",
     "email": "updatedemail@example.com"
