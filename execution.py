@@ -1,7 +1,7 @@
 import requests
 
 #POST
-'''
+
 url = "http://localhost:8000/users"
 data = {
     "name": "John Doe",
@@ -13,7 +13,7 @@ headers = {
 
 response = requests.post(url, json=data, headers=headers)
 print(response.json())
-'''
+
 
 #GET
 '''

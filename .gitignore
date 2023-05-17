@@ -1,0 +1,10 @@
+# React .gitignore
+/node_modules
+/build
+
+# FastAPI .gitignore
+__pycache__/
+.env
+/.venv
+/.vscode
+/.idea
