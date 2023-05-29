@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
+from app.database import stadium_collection
 
 router = APIRouter()
 

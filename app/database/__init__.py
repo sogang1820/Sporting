@@ -9,6 +9,11 @@ DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 client = MongoClient(MONGODB_URL)
 
-database = client[DATABASE_NAME]
+user_database = client[DATABASE_NAME]
+user_collection = user_database["users"]
 
-collection = database["users"]
+reservation_database = client[DATABASE_NAME]
+reservation_collection = reservation_database["reservations"]
+
+stadium_database = client[DATABASE_NAME]
+stadium_collection = stadium_database["stadiums"]
