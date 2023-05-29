@@ -19,13 +19,13 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(user_id):
-    expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expires_delta = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     expire = datetime.utcnow() + expires_delta
     encoded_jwt = jwt.encode({"user_id": user_id, "exp": expire}, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def login_user(username: str, password: str):
-    user = user_collection.find_one({"username": username})
+def login_user(user_id: str, password: str):
+    user = user_collection.find_one({"user_id": user_id})
     if user and verify_password(password, user["password"]):
         access_token = create_access_token(user["user_id"])
         return access_token

@@ -17,7 +17,4 @@ user_info = {
 response = requests.post(SERVICE_URL+"login", json=user_info)
 
 # 응답 확인
-if response.status_code == 200:
-    print("로그인 성공")
-else:
-    print("로그인 실패:", response.text)
+print(response.text)
