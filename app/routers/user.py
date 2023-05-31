@@ -40,7 +40,7 @@ def login(user: User):
     if access_token:
         return JSONResponse(content={"message": "Login successful", "access_token": access_token})
     else:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        raise HTTPException(status_code=401, detail="Invalid ID or password")
     
 @router.post("/logout")
 def logout():
