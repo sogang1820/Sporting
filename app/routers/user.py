@@ -1,14 +1,21 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 from app.database import user_collection
 from app.database.user import User
 from app.services.login import login_user
+from app.services.token import verify_token
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@router.options("/login")
+async def options_logion():
+    return {"Allow": "POST, OPTIONS"}
 
 @router.post("/signup", status_code=201)
 def signup(user:User):
@@ -35,3 +42,16 @@ def login(user: User):
 def logout():
     # logout
     return JSONResponse(content={"message": "Logout successful"})
+
+@router.get("/users/{user_id}/profile")
+def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
+    # Access token verify
+    if not verify_token(token, user_id):
+        raise HTTPException(status_code=401, detail="Invalid access token")
+
+    # Find User info
+    user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
