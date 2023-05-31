@@ -23,6 +23,10 @@ def signup(user:User):
     hashed_password = pwd_context.hash(user.password)
     user_dict = user.dict()
     user_dict["password"] = hashed_password
+    
+    is_exist = user_collection.find_one({"user_id": user.user_id})
+    if is_exist:
+        return JSONResponse(status_code=400, content={"message": "ID already taken", "user_id": user.user_id})
 
     result = user_collection.insert_one(user_dict)
     user_id = str(result.inserted_id)
