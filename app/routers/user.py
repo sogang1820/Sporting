@@ -13,6 +13,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+@router.options("/login")
+async def options_logion():
+    return {"Allow": "POST, OPTIONS"}
+
 @router.post("/signup", status_code=201)
 def signup(user:User):
     # signup
