@@ -46,8 +46,8 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid access token")
 
     # Find User info
-    user = user_collection.find_one({"user_id": user_id})
+    user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
     if user:
-        return {"user_id": user["user_id"], "username": user["username"]}
+        return user
     else:
         raise HTTPException(status_code=404, detail="User not found")
