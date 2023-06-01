@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, responses, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -59,3 +59,41 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
         return user
     else:
         raise HTTPException(status_code=404, detail="User not found")
+    
+@router.put("/users/{user_id}/profile")
+def update_user(user_id: str, updated_user: User, token: str = Depends(oauth2_scheme)):
+    # Access token verify
+    if not verify_token(token, user_id):
+        raise HTTPException(status_code=401, detail="Invalid access token")
+
+    # Find User info
+    user = user_collection.find_one({"user_id": user_id})
+    if user:
+        # Update user info
+        updated_user_dict = updated_user.dict(exclude_unset=True)
+        if "password" in updated_user_dict:
+            hashed_password = pwd_context.hash(updated_user_dict["password"])
+            updated_user_dict["password"] = hashed_password
+
+        update_result = user_collection.update_one({"user_id": user_id}, {"$set": updated_user_dict})
+
+        if update_result.modified_count > 0:
+            return JSONResponse(content={"message": "User updated successfully"})
+        else:
+            raise HTTPException(status_code=500, detail="Failed to update user")
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+
+@router.delete("/users/{user_id}")
+def delete_user(user_id: str, token: str = Depends(oauth2_scheme)):
+    # Access token verify
+    if not verify_token(token, user_id):
+        raise HTTPException(status_code=401, detail="Invalid access token")
+
+    # Delete User
+    delete_result = user_collection.delete_one({"user_id": user_id})
+
+    if delete_result.deleted_count > 0:
+        return responses.Response(status_code=204)
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete user")
