@@ -6,3 +6,9 @@ class User(BaseModel):
     username: str = Field(default=None)
     phone_number: str = Field(default=None)
     is_manager: bool = Field(default=None)
+    points: int
+
+class Payment(BaseModel):
+    user_id: str
+    amount: int
+    token: str
