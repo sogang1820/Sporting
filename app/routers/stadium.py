@@ -1,18 +1,29 @@
-from fastapi import APIRouter, HTTPException, responses
+from fastapi import APIRouter, HTTPException, responses, Depends
 from fastapi.responses import JSONResponse
 from bson import ObjectId
 
 from app.database import stadium_collection
 from app.database.stadium import Stadium
+from app.database.user import User
+
+from app.services.token import get_current_user
 
 router = APIRouter()
 
 @router.post("/stadiums", status_code=201)
-def create_stadium(stadium: Stadium):
+def create_stadium(stadium: Stadium, current_user: User = Depends(get_current_user)):
 
-    #TODO
-    #이름, 주소, 카테고리가 모두 같은 구장이 있는지 검색
-    #관리자 권한이 있는지 확인
+    if not current_user.is_manager:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    is_exist = stadium_collection.find_one({
+        "stadium_name": stadium.stadium_name,
+        "stadium_location": stadium.stadium_location,
+        "sports_category": stadium.sports_category
+    })
+
+    if is_exist:
+        raise HTTPException(status_code=400, detail="Stadium already exists")
 
     stadium_collection.insert_one(stadium.dict())
 
@@ -22,20 +33,21 @@ def create_stadium(stadium: Stadium):
 def read_stadium(stadium_id: str):
     stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)})
 
-    #TODO
-    #구장에 관련된 예약 항목 보여주기
-
     if stadium:
-        stadium.pop("_id")
+        stadium.pop("_id")        
+
+        #TODO
+        #구장에 관련된 예약 항목 보여주기
+
         return stadium
     else:
         raise HTTPException(status_code=404, detail="Stadium not found")
     
 @router.put("/stadiums/{stadium_id}")
-def update_stadium(stadium_id: str, updated_stadium: Stadium):
+def update_stadium(stadium_id: str, updated_stadium: Stadium, current_user: User = Depends(get_current_user)):
 
-    #TODO
-    #관리자 권한이 있는지 확인
+    if not current_user.is_manager:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     stadium = stadium_collection.find_one({"stadium_id": stadium_id})
     if stadium:
@@ -49,10 +61,10 @@ def update_stadium(stadium_id: str, updated_stadium: Stadium):
         raise HTTPException(status_code=401, detail="Stadium Not Found")
     
 @router.delete("/stadiums/{stadium_id}")
-def delete_stadium(stadium_id: str):
+def delete_stadium(stadium_id: str, current_user: User = Depends(get_current_user)):
 
-    #TODO
-    #관리자 권한이 있는지 확인
+    if not current_user.is_manager:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     result = stadium_collection.delete_one({"_id": ObjectId(stadium_id)})
     if result.deleted_count == 1:
