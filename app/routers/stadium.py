@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, responses, Depends
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
 from bson import ObjectId
 
 from app.database import stadium_collection
@@ -9,11 +10,14 @@ from app.database.user import User
 from app.services.token import get_current_user
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 @router.post("/stadiums", status_code=201)
-def create_stadium(stadium: Stadium, current_user: User = Depends(get_current_user)):
+def create_stadium(stadium: Stadium, token: str = Depends(oauth2_scheme)):
 
-    if not current_user.is_manager:
+    current_user = get_current_user(token)
+
+    if not current_user["is_manager"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     is_exist = stadium_collection.find_one({
@@ -24,6 +28,8 @@ def create_stadium(stadium: Stadium, current_user: User = Depends(get_current_us
 
     if is_exist:
         raise HTTPException(status_code=400, detail="Stadium already exists")
+    
+    stadium.manager_id = current_user["user_id"]
 
     stadium_collection.insert_one(stadium.dict())
 
@@ -44,9 +50,11 @@ def read_stadium(stadium_id: str):
         raise HTTPException(status_code=404, detail="Stadium not found")
     
 @router.put("/stadiums/{stadium_id}")
-def update_stadium(stadium_id: str, updated_stadium: Stadium, current_user: User = Depends(get_current_user)):
+def update_stadium(stadium_id: str, updated_stadium: Stadium, token: str = Depends(oauth2_scheme)):
 
-    if not current_user.is_manager:
+    current_user = get_current_user(token)
+
+    if not current_user["is_manager"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     stadium = stadium_collection.find_one({"stadium_id": stadium_id})
@@ -61,9 +69,11 @@ def update_stadium(stadium_id: str, updated_stadium: Stadium, current_user: User
         raise HTTPException(status_code=401, detail="Stadium Not Found")
     
 @router.delete("/stadiums/{stadium_id}")
-def delete_stadium(stadium_id: str, current_user: User = Depends(get_current_user)):
+def delete_stadium(stadium_id: str, token: str = Depends(oauth2_scheme)):
 
-    if not current_user.is_manager:
+    current_user = get_current_user(token)
+
+    if not current_user["is_manager"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     result = stadium_collection.delete_one({"_id": ObjectId(stadium_id)})

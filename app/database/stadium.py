@@ -8,3 +8,4 @@ class Stadium(BaseModel):
     stadium_img : bytes
     operating_hours : str
     stadium_info : str
+    manager_id : str = Field(default=None)
