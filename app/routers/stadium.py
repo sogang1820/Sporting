@@ -35,15 +35,38 @@ def create_stadium(stadium: Stadium, token: str = Depends(oauth2_scheme)):
 
     return JSONResponse(content={"message": "Stadium Created"}, status_code=201)
 
+@router.get("/stadiums")
+def show_stadium(page: int, per_page: int):
+
+    total_count = stadium_collection.count_documents({})
+
+    skip = (page - 1) * per_page
+    limit = per_page
+
+    stadiums = stadium_collection.find().skip(skip).limit(limit).sort("_id")
+
+    serialized_stadiums = []
+    for stadium in stadiums:
+        stadium["_id"] = str(stadium["_id"])  # ObjectId를 문자열로 변환
+        serialized_stadiums.append(stadium)
+
+    return {
+        "total_count": total_count,
+        "page": page,
+        "per_page": per_page,
+        "stadiums": serialized_stadiums
+    }
+
 @router.get("/stadiums/{stadium_id}")
 def read_stadium(stadium_id: str):
     stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)})
 
     if stadium:
+        stadium = stadium.copy()
         stadium.pop("_id")        
 
         #TODO
-        #구장에 관련된 예약 항목 보여주기
+        #구장에 관련된 예약 상세 항목 보여주기
 
         return stadium
     else:
@@ -53,8 +76,9 @@ def read_stadium(stadium_id: str):
 def update_stadium(stadium_id: str, updated_stadium: Stadium, token: str = Depends(oauth2_scheme)):
 
     current_user = get_current_user(token)
+    stadium = stadium_collection.find_one({"stadium_id" : stadium_id})
 
-    if not current_user["is_manager"]:
+    if stadium["manager_id"] != current_user["user_id"] or not current_user["is_manager"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     stadium = stadium_collection.find_one({"stadium_id": stadium_id})
@@ -72,8 +96,9 @@ def update_stadium(stadium_id: str, updated_stadium: Stadium, token: str = Depen
 def delete_stadium(stadium_id: str, token: str = Depends(oauth2_scheme)):
 
     current_user = get_current_user(token)
+    stadium = stadium_collection.find_one({"stadium_id" : stadium_id})
 
-    if not current_user["is_manager"]:
+    if stadium["manager_id"] != current_user["user_id"] or not current_user["is_manager"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     result = stadium_collection.delete_one({"_id": ObjectId(stadium_id)})
