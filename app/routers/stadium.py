@@ -8,6 +8,7 @@ from app.database.stadium import Stadium
 from app.database.user import User
 
 from app.services.token import get_current_user
+from app.services.reservation import get_stadium_reservations
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
@@ -47,7 +48,9 @@ def show_stadium(page: int, per_page: int):
 
     serialized_stadiums = []
     for stadium in stadiums:
-        stadium["_id"] = str(stadium["_id"])  # ObjectId를 문자열로 변환
+        stadium["_id"] = str(stadium["_id"])
+        stadium_reservations = get_stadium_reservations(stadium["_id"])
+        stadium["reservations"] = stadium_reservations
         serialized_stadiums.append(stadium)
 
     return {
@@ -62,11 +65,9 @@ def read_stadium(stadium_id: str):
     stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)})
 
     if stadium:
-        stadium = stadium.copy()
-        stadium.pop("_id")        
 
-        #TODO
-        #구장에 관련된 예약 상세 항목 보여주기
+        stadium_reservations = get_stadium_reservations(stadium_id)
+        stadium["reservations"] = stadium_reservations
 
         return stadium
     else:
