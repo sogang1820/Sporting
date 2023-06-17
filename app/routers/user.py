@@ -14,7 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.options("/login")
-async def options_logion():
+async def options_login():
     return {"Allow": "POST, OPTIONS"}
 
 @router.post("/signup", status_code=201)
@@ -23,6 +23,7 @@ def signup(user:User):
     hashed_password = pwd_context.hash(user.password)
     user_dict = user.dict()
     user_dict["password"] = hashed_password
+    user_dict["points"] = 0
     
     is_exist = user_collection.find_one({"user_id": user.user_id})
     if is_exist:

@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field
-
-from app.database.user import User
-from app.database.stadium import Stadium
+from typing import List
+#from datetime import datetime
 
 class Reservation(BaseModel):
     user_id : str
-    stadium_id : str 
-    date : int
-    time : int
+    stadium_id : str
+    date : str
+    time : List[str]
+    is_paid : bool = False
