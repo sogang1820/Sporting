@@ -1,3 +1,4 @@
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -91,7 +92,7 @@ class DB:
         db = client['SportingDB']
 
         print(db)
-        collection = db['Stadium']
+        collection = db['stadiums']
         print(collection)
         return collection
 
@@ -206,9 +207,18 @@ class CrawlingHandler :
             driver.get(u)
             name = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[2]/ul[1]/li[2]/strong').text
             date = driver.find_element(By.XPATH,'//*[@id="Container"]/div/div[1]/div/div[2]/ul[1]/li[3]/strong').text
-            
+            if date[6] != '1':
+                if date[10] != '0':
+                    date = date[:4] +'-' +date[7:8]+'-'+date[10:12]
+                else:
+                    date = date[:4] +'-' +date[7:8]+'-'+date[10:11]
+            else:
+                if date[8] != '0':
+                    date = date[:4] +'-' +date[6:8]+'-'+date[10:12]
+                else:
+                    date = date[:4] +'-' +date[6:8]+'-'+date[10:11]
             address = driver.find_element(By.XPATH,'//*[@id="Container"]/div/div[1]/div/div[2]/ul[2]/li[2]').text
-            address = address[6:]
+            address = address[5:]
             slice_idx = address.find('n')
             address = address[slice_idx+1:]
             image_url = None
@@ -245,9 +255,13 @@ class CrawlingHandler :
                 hour = gg[1].text
                 # print(len(hour))
                 price = g.find('span',{'class','price'}).text
-                # print(price)
                 if price[0] == '0':
                     continue
+                idx = price.find(',')
+                price = price[:idx]+price[idx+1:-2]
+                price = int(price)
+                print(price)
+                
                 start, end = self.time_calc(start,hour)
                 time_table.append([start,end])
             
@@ -264,7 +278,7 @@ class CrawlingHandler :
                     'operating_hours': time_table,
                     'stadium_img' : image_url
                 }
-            print(post)
+            # print(post)
             collection.insert_one(post)
             
     
@@ -318,12 +332,17 @@ class CrawlingHandler :
         time_dic = {}
         for s in t:
             date, start, end = self.parse_info(s.find('span').text)
+            if date[5] != '1':
+                date = date[:4] +'-' +date[6:7]+'-'+date[9:-1]
+            else:
+                date = date[:4] +'-' +date[6:8]+'-'+date[10:-1]
+            print(date)
             time_tmp.append([date,start,end])
             time_dic[date] = []
 
         for t in time_tmp:
             time_dic[t[0]].append([t[1],t[2]])
-        price = '55,000원'
+        price = 55000
 
         for t in time_dic:
             post = {
@@ -391,7 +410,17 @@ class CrawlingHandler :
                 print(e)
                 continue
             date = driver.find_element(By.XPATH,'/html/body/div[1]/div[2]/div/div[4]/div[1]/div[2]/div[1]/div[1]').text
-            print(date)
+            if date[5] != '1':
+                if date[8] != '1':
+                    date = date[:4] +'-' +date[6:7]+'-'+date[9:-4]
+                else:
+                    date = date[:4] +'-' +date[6:7]+'-'+date[8:-4]
+            else:
+                if date[8] != '1':
+                    date = date[:4] +'-' +date[5:7]+'-'+date[9:-4]
+                else:
+                    date = date[:4] +'-' +date[5:7]+'-'+date[8:-4]
+            # print(date)
             while True:
                 driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
                 time.sleep(2.0)
@@ -449,7 +478,9 @@ class CrawlingHandler :
                         continue
                     price = end_times[0].text
                     price = price[:-5]
-                    # print(price[:-5])
+                    idx = price.find(',')
+                    price = price[:idx]+price[idx+1:-2]
+                    price = int(price)
                     for t in range(len(start_times)):
                         start_end = []
                         start = start_times[t]["offset"]
@@ -470,7 +501,7 @@ class CrawlingHandler :
                         'stadium_img' : image_url
                     }
                     
-                    print(post)
+                    # print(post)
                     collection.insert_one(post)
                 except:
                     pass
