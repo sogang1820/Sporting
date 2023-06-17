@@ -36,6 +36,7 @@ def create_stadium(stadium: Stadium, token: str = Depends(oauth2_scheme)):
 
     return JSONResponse(content={"message": "Stadium Created"}, status_code=201)
 
+'''
 @router.get("/stadiums")
 def show_stadium(page: int, per_page: int):
 
@@ -59,6 +60,27 @@ def show_stadium(page: int, per_page: int):
         "per_page": per_page,
         "stadiums": serialized_stadiums
     }
+'''
+
+@router.get("/stadiums")
+def search_stadiums(stadium_name: str = None, stadium_location: str = None, sports_category: str = None):
+    query = {}
+
+    if stadium_name:
+        query["stadium_name"] = stadium_name
+    if stadium_location:
+        query["stadium_location"] = stadium_location
+    if sports_category:
+        query["sports_category"] = sports_category
+
+    stadiums = stadium_collection.find(query).sort("_id")
+
+    serialized_stadiums = []
+    for stadium in stadiums:
+        stadium["_id"] = str(stadium["_id"])
+        serialized_stadiums.append(stadium)
+
+    return serialized_stadiums
 
 @router.get("/stadiums/{stadium_id}")
 def read_stadium(stadium_id: str):
