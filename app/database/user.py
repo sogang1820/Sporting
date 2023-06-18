@@ -9,7 +9,11 @@ class User(BaseModel):
     points: int = Field(default=None)
 
 class Payment(BaseModel):
-    user_id: str
-    amount: int
-    token: str
-    manager_id: str
+    user_id: str = Field(default=None)
+    amount: int = Field(default=None)
+    token: str = Field(default=None)
+    manager_id: str = Field(default=None)
+
+class Amount(BaseModel):
+    user_id: str = Field(default=None)
+    amount: int = Field(default=None)

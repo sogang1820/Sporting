@@ -1,18 +1,26 @@
 from typing import Optional
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Depends
 from fastapi.responses import RedirectResponse
 import requests
 from app.database import user_collection
+from app.database.user import Amount
+from app.services.token import get_current_user
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 router = APIRouter()
 
 
-amount = 10000
-user = user_collection.find_one({"user_id": "cstrnull00"})    
+#amount = 10000
+#user = user_collection.find_one({"user_id": "cstrnull00"})    
 
 # 결제 요청
 @router.get('/')
-def kakaopay():
+def kakaopay(amount:int, token: str = Depends(oauth2_scheme)):
+    #amount.amount = 1000
+    user = get_current_user(token)
+
     url = "https://kapi.kakao.com/v1/payment/ready"
     APP_ADMIN_KEY = "71711a60a9cf0ac28b8cbef7e909c6fb"
     headers = {

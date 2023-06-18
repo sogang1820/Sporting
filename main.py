@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.routers import point, reservation, stadium, user, kakao_pay_router
 from fastapi.middleware.cors import CORSMiddleware
 
