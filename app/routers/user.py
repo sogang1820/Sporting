@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 from app.database import user_collection
+from app.database import reservation_collection
 from app.database.user import User
 from app.services.login import login_user
 from app.services.token import verify_token
@@ -53,10 +54,13 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
     # Access token verify
     if not verify_token(token, user_id):
         raise HTTPException(status_code=401, detail="Invalid access token")
+    
+    user_reservations = reservation_collection.find({"user_id": user_id})
 
     # Find User info
     user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
     if user:
+        user["reservations"] = list(user_reservations)
         return user
     else:
         raise HTTPException(status_code=404, detail="User not found")

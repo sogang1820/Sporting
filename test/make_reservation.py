@@ -8,12 +8,12 @@ SERVICE_URL = os.getenv("SERVICE_URL")
 endpoint = "reservations"
 
 headers = {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY3N0cm51bGwwMCIsImV4cCI6MTY4NjU3OTUyN30.LWOn2MzaVmrpEVFOlA7jIW18m4g0Bj-NHQE85nwDWFY",    "Content-Type": "application/json"
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY3N0cm51bGwwMCIsImV4cCI6MTY4NzA1NzA4MX0.d8EJ_Xaoep59EoJauPs4pgNrCeax4alzeAXNqYvbdMA"
 }
 reservation_data = {
     "user_id": "cstrnull00",
-    "stadium_id": "647f2ba5a32226c3ec7d22aa",
-    "date": "2023-06-13",
+    "stadium_id": "648d41d468fb7e7d7fb6c838",
+    "date": "2023-06-19",
     "time": ["10:00", "12:00"]
 }
 
