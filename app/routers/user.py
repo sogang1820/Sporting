@@ -67,6 +67,7 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
     # Find User info
     user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
     if user:
+        user_reservations = list(reservation_collection.find({"user_id": user_id}))
         for reservation in user_reservations:
             stadium_id = reservation["stadium_id"]
             stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)}, projection={"_id": False})
@@ -75,7 +76,7 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
             else:
                 raise HTTPException(status_code=404, detail="Stadium not found")
 
-        user["reservations"] = user_reservations
+        user["reservations"] = json_util.dumps(user_reservations, default=str)
         return user
     else:
         raise HTTPException(status_code=404, detail="User not found")
