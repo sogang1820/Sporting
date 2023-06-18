@@ -20,16 +20,11 @@ async def make_reservation(reservation: Reservation, token: str = Depends(oauth2
 
     current_user = get_current_user(token)
 
-    current_time = datetime.now().date()
-    reservation_datetime = datetime.strptime(reservation.date, "%Y-%m-%d").date()
+    current_time = datetime.now()
+    reservation_datetime = datetime.strptime(reservation.date, "%Y-%m-%d")
 
-    if reservation_datetime < current_time:
-        raise HTTPException(status_code=400, detail="Cannot make a reservation in the past")
-
-    for time_slot in reservation.time:
-        time_slot_datetime = datetime.strptime(time_slot, "%H:%M").time()
-        if reservation.date == current_time.strftime("%Y-%m-%d") and time_slot_datetime <= current_time.time():
-            raise HTTPException(status_code=400, detail="Cannot make a reservation in the past or present")
+    if reservation_datetime.date() < current_time.date() or (reservation_datetime.date() == current_time.date() and any(datetime.strptime(time_slot, "%H:%M").time() <= current_time.time() for time_slot in reservation.time)):
+        raise HTTPException(status_code=400, detail="Cannot make a reservation in the past or present")
 
     is_exist = reservation_collection.find_one({
         "stadium_id": reservation.stadium_id,
