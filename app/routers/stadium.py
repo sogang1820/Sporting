@@ -77,8 +77,8 @@ def search_stadiums(stadium_name: str = None, stadium_location: str = None, spor
 
     serialized_stadiums = []
     for stadium in stadiums:
-        stadium["_id"] = str(stadium["_id"])
-        serialized_stadiums.append(stadium)
+        serialized_stadium = {**stadium, "_id": str(stadium["_id"])}
+        serialized_stadiums.append(serialized_stadium)
 
     return serialized_stadiums
 
@@ -87,13 +87,11 @@ def read_stadium(stadium_id: str):
     stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)})
 
     if stadium:
-
-        stadium_reservations = get_stadium_reservations(stadium_id)
-        stadium["reservations"] = stadium_reservations
-
-        return stadium
+        serialized_stadium = {**stadium, "_id": str(stadium["_id"])}
+        return serialized_stadium
     else:
         raise HTTPException(status_code=404, detail="Stadium not found")
+
     
 @router.put("/stadiums/{stadium_id}")
 def update_stadium(stadium_id: str, updated_stadium: Stadium, token: str = Depends(oauth2_scheme)):
