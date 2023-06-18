@@ -9,6 +9,9 @@ from app.database.user import User
 from app.services.login import login_user
 from app.services.token import verify_token
 
+from bson import json_util
+import json
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -55,12 +58,13 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
     if not verify_token(token, user_id):
         raise HTTPException(status_code=401, detail="Invalid access token")
     
-    user_reservations = reservation_collection.find({"user_id": user_id})
+    # Retrieve user's reservations
+    user_reservations = list(reservation_collection.find({"user_id": user_id}))
 
     # Find User info
     user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
     if user:
-        user["reservations"] = list(user_reservations)
+        user["reservations"] = json.loads(json_util.dumps(user_reservations, default=str))  # Convert ObjectId to string
         return user
     else:
         raise HTTPException(status_code=404, detail="User not found")
