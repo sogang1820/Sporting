@@ -9,7 +9,8 @@ SERVICE_URL = os.getenv("SERVICE_URL")
 payment_info = {
     "user_id": "cstrnull00",
     "amount": 50,
-    "token": "aa"
+    "token": "aa",
+    "manager_id": "admin01"
 }
 
 # POST 요청 보내기

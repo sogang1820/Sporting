@@ -1,8 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response
 from fastapi import HTTPException
+from fastapi.responses import RedirectResponse
+
+from typing import Optional
+import requests
 import stripe
 from app.database import user_collection
 from app.database.user import Payment
+
+
 
 router = APIRouter()
 '''
@@ -48,6 +54,8 @@ async def make_payment(payment:Payment):
         # 결제 성공 시 포인트 차감
         user_collection.update_one({"user_id": pay['user_id']}, {"$inc": {"points": -pay['amount']}})
 
+        user_collection.update_one({"user_id": pay['manager_id']}, {"$inc": {"points": +pay['amount']}})
+
         # 결제 성공 시 응답
         return {"status": "success", "message": "Payment succeeded!"}
 
@@ -71,6 +79,46 @@ async def get_user_points(user_id: str):
 
     return {"user_id": user_id, "points": user.get("points", 0)}
 
+
+
+'''
+@app.post("/charge")
+def charge(amount: int):
+    # 카카오페이 API 엔드포인트와 헤더 설정
+    url = "https://kapi.kakao.com/v1/payment/ready"
+    headers = {
+        "Authorization": "KakaoAK ${SERVICE_APP_ADMIN_KEY}",
+        "Content-Type": "Content-type: application/x-www-form-urlencoded;charset=utf-8"
+    }
+
+    # 충전 요청을 위한 데이터 생성
+    data = {
+        "cid":"TC0ONETIME",
+        "partner_order_id":"",
+        "partner_user_id":"",
+        "item_name":"",
+        "quantity":"",
+        "total_amount":"",
+        "tax_free_amount":"",
+        "approval_url":"",
+        "cancel_url":"",
+        "fail_url":"",
+
+        "amount": amount,
+        # 필요한 다른 데이터 추가
+    }
+
+    # 카카오페이 충전 요청 보내기
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+
+    # 카카오페이 API 응답 처리 및 결과 반환
+    if response.status_code == 200 and result["code"] == 0:
+        return {"message": "충전이 완료되었습니다."}
+    else:
+        return {"message": "충전 요청에 실패했습니다.", "error": result["msg"]}
+    
+'''        
 '''
 # 서버 실행
 if __name__ == "__main__":

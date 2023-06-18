@@ -12,3 +12,4 @@ class Payment(BaseModel):
     user_id: str
     amount: int
     token: str
+    manager_id: str
