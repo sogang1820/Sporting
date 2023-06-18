@@ -7,8 +7,7 @@ load_dotenv()
 SERVICE_URL = os.getenv("SERVICE_URL")
 
 headers = {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY3N0cm51bGwwMCIsImV4cCI6MTY4NzA1NzA4MX0.d8EJ_Xaoep59EoJauPs4pgNrCeax4alzeAXNqYvbdMA"
-
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY3N0cm51bGwwMCIsImV4cCI6MTY4NzA3MzIyOH0.cbQCMl6FInJ7bz5Stm0A293nSWyn3IC-2h7fyNeDepI"
 }
 params = {
     "user_id": "cstrnull00"

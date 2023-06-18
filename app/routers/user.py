@@ -5,11 +5,14 @@ from passlib.context import CryptContext
 
 from app.database import user_collection
 from app.database import reservation_collection
+from app.database import stadium_collection
 from app.database.user import User
 from app.services.login import login_user
 from app.services.token import verify_token
+from app.services.reservation import get_stadium_reservations
 
 from bson import json_util
+from bson.objectid import ObjectId
 import json
 
 router = APIRouter()
@@ -64,7 +67,15 @@ def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
     # Find User info
     user = user_collection.find_one({"user_id": user_id}, projection={"_id": False})
     if user:
-        user["reservations"] = json.loads(json_util.dumps(user_reservations, default=str))  # Convert ObjectId to string
+        for reservation in user_reservations:
+            stadium_id = reservation["stadium_id"]
+            stadium = stadium_collection.find_one({"_id": ObjectId(stadium_id)}, projection={"_id": False})
+            if stadium:
+                reservation["stadium"] = stadium
+            else:
+                raise HTTPException(status_code=404, detail="Stadium not found")
+
+        user["reservations"] = user_reservations
         return user
     else:
         raise HTTPException(status_code=404, detail="User not found")
