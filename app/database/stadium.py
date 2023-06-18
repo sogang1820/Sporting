@@ -3,6 +3,7 @@ from typing import List
 
 class Stadium(BaseModel):
     stadium_name : str
+    date : str
     stadium_location : str
     stadium_price : int
     sports_category : str
